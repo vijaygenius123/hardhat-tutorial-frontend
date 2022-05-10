@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {ethers} from "ethers";
+import ABI from './ABI.json';
 
 function App() {
     const [balance, setBalance] = useState();
@@ -7,7 +8,9 @@ function App() {
     const [greeting, setGreeting] = useState();
     const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const signer = provider.getSigner()
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(contractAddress, ABI, signer)
+
 
     useEffect(() => {
         const connectWallet = async () => {
@@ -18,9 +21,16 @@ function App() {
             setBalance(ethers.utils.formatEther(balance))
         }
 
+        const getGreeting = async () => {
+            const greeting = await contract.greet()
+            setGreeting(greeting)
+        }
+
         connectWallet()
             .catch(console.error)
         getBalance()
+            .catch(console.error)
+        getGreeting()
             .catch(console.error)
     }, [])
 
@@ -30,13 +40,14 @@ function App() {
 
     const handleGreetingSubmit = (e) => {
         e.preventDefault();
+
     }
 
     return (
         <div className={"container"}>
             <div className="row mt-5">
                 <div className="col">
-                    <h3>Greeting</h3>
+                    <h3>Greeting: {greeting}</h3>
                     <p>Contract Balance: {balance || 'NA'}</p>
                 </div>
                 <div className="col">
